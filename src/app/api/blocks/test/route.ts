@@ -1,0 +1,69 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { BlockType } from '@prisma/client';
+
+/**
+ * Create a test countdown block
+ * POST /api/blocks/test
+ */
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user?.email) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: { shops: true },
+    });
+
+    if (!user || user.shops.length === 0) {
+      return NextResponse.json(
+        { error: 'No shops found. Please connect a shop first.' },
+        { status: 400 }
+      );
+    }
+
+    const shop = user.shops[0];
+
+    // Create a countdown block that ends in 24 hours
+    const endAt = new Date();
+    endAt.setHours(endAt.getHours() + 24);
+
+    const block = await prisma.block.create({
+      data: {
+        name: 'Test Countdown Block',
+        type: BlockType.COUNTDOWN,
+        shopId: shop.id,
+        configJson: {
+          title: 'Flash Sale Ends Soon!',
+          endAt: endAt.toISOString(),
+          backgroundColor: '#FF6B6B',
+          textColor: '#FFFFFF',
+        },
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      block: {
+        id: block.id,
+        name: block.name,
+        type: block.type,
+        configJson: block.configJson,
+        renderUrl: `/api/render/${block.id}?preview=1`,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error creating test block:', error);
+    return NextResponse.json(
+      { error: 'Failed to create test block', details: error.message },
+      { status: 500 }
+    );
+  }
+}

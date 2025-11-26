@@ -45,6 +45,39 @@ Instead of static images and text, emails use **dynamic blocks** (hero banners, 
 
 ---
 
+## 🚀 Deployment
+
+DynamicMail is a Next.js application, which can be easily deployed to platforms like [Vercel](https://vercel.com/docs/concepts/next.js/deploying) or [Netlify](https://docs.netlify.com/integrations/frameworks/next-js/).
+
+### Environment Variables
+
+The application relies on several environment variables for proper functioning. Ensure these are set in your deployment environment (e.g., Vercel Project Settings, Netlify Build environment variables). The application includes a validation step that will fail fast if critical variables are missing or incorrectly formatted.
+
+| Variable             | Description                                                   |
+| :------------------- | :------------------------------------------------------------ |
+| `DATABASE_URL`       | Connection string for your PostgreSQL database (e.g., from Neon, Supabase, Render). |
+| `NEXTAUTH_URL`       | The canonical URL of your deployed application (e.g., `https://your-domain.com`). Used by NextAuth.js. |
+| `NEXTAUTH_SECRET`    | A long, random string used to sign NextAuth.js cookies. Generate one with `openssl rand -base64 32`. |
+| `SHOPIFY_API_KEY`    | Your Shopify Partner App client ID.                           |
+| `SHOPIFY_API_SECRET` | Your Shopify Partner App client secret.                       |
+| `REDIS_URL`          | Connection string for your Redis instance (e.g., Upstash Redis). Used for caching. |
+
+### Build & Start
+
+To build the application for production:
+
+```bash
+npm run build
+```
+
+To start the application in production mode:
+
+```bash
+npm run start
+```
+
+---
+
 ## 🗂 Project Structure (high-level)
 
 ```txt
